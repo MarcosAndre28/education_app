@@ -9,11 +9,11 @@ import 'on_boarding_repo.mock.dart';
 
 void main() {
   late OnBoardingRepo repo;
-  late ICacheFirstTimeUseCase useCase;
+  late ICacheFirstTimerUseCase useCase;
 
   setUp(() {
     repo = MockOnBoardingRepo();
-    useCase = ICacheFirstTimeUseCase(repo);
+    useCase = ICacheFirstTimerUseCase(repo);
   });
 
   test(

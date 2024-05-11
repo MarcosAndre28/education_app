@@ -7,27 +7,28 @@ part 'on_boarding_state.dart';
 
 class OnBoardingCubit extends Cubit<OnBoardingState> {
   OnBoardingCubit({
-    required ICacheFirstTimeUseCase cacheFirstTimeUseCase,
-    required ICheckIfUserIsFirstTimerUseCase checkIfUserIsFirstTimeUseCase,
-  })  : _cacheFirstTimeUseCase = cacheFirstTimeUseCase,
-        _checkIfUserIsFirstTimeUseCase = checkIfUserIsFirstTimeUseCase,
+    required ICacheFirstTimerUseCase cacheFirstTimer,
+    required ICheckIfUserIsFirstTimerUseCase checkIfUserIsFirstTimer,
+  })  : _cacheFirstTimer = cacheFirstTimer,
+        _checkIfUserIsFirstTimer = checkIfUserIsFirstTimer,
         super(const OnBoardingInitial());
 
-  final ICacheFirstTimeUseCase _cacheFirstTimeUseCase;
-  final ICheckIfUserIsFirstTimerUseCase _checkIfUserIsFirstTimeUseCase;
+  final ICacheFirstTimerUseCase _cacheFirstTimer;
+  final ICheckIfUserIsFirstTimerUseCase _checkIfUserIsFirstTimer;
 
-  Future<void> cacheFirstTime() async {
+  Future<void> cacheFirstTimer() async {
     emit(const CachingFirstTimer());
-    final result = await _cacheFirstTimeUseCase();
+    final result = await _cacheFirstTimer();
+
     result.fold(
-      (failure) => emit( OnBoardingError(failure.message)),
-      (_) => emit(const UserCached()),
+          (failure) => emit(OnBoardingError(failure.errorMessage)),
+          (_) => emit(const UserCached()),
     );
   }
 
-  Future<void> checkIfUserIsFirstTime() async {
-    emit(const CheckingIfUserIsFirstTime());
-    final result = await _checkIfUserIsFirstTimeUseCase();
+  Future<void> checkIfUserIsFirstTimer() async {
+    emit(const CheckingIfUserIsFirstTimer());
+    final result = await _checkIfUserIsFirstTimer();
     result.fold(
       (failure) => emit( const OnBoardingStatus(isFirstTime: true)),
       (status) => emit( OnBoardingStatus(isFirstTime: status)),
