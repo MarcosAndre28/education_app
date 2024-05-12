@@ -3,7 +3,11 @@ import 'package:education_app/core/res/fonts.dart';
 import 'package:education_app/core/services/router.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+import 'core/services/injection_container.dart';
+
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await init();
   runApp(const MyApp());
 }
 

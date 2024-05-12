@@ -63,4 +63,69 @@ void main() {
       );
     },
   );
+
+  group(
+    'checkIfUserIsFirstTimer',
+    () {
+      test(
+        'should return true when user is first timer',
+        () async {
+          when(() => mockOnBoardingLocalDataSrc.checkIfUserIsFirstTimer())
+              .thenAnswer((_) async => Future.value(true));
+
+          final result = await onBoardingRepoImpl.checkIfUserIsFirstTimer();
+
+          expect(result, equals(const Right<dynamic, bool>(true)));
+          verify(() => mockOnBoardingLocalDataSrc.checkIfUserIsFirstTimer())
+              .called(1);
+          verifyNoMoreInteractions(mockOnBoardingLocalDataSrc);
+        },
+      );
+
+      test(
+        'should return false when user is first timer',
+        () async {
+          when(() => mockOnBoardingLocalDataSrc.checkIfUserIsFirstTimer())
+              .thenAnswer((_) async => Future.value(false));
+
+          final result = await onBoardingRepoImpl.checkIfUserIsFirstTimer();
+
+          expect(result, equals(const Right<dynamic, bool>(false)));
+          verify(() => mockOnBoardingLocalDataSrc.checkIfUserIsFirstTimer())
+              .called(1);
+          verifyNoMoreInteractions(mockOnBoardingLocalDataSrc);
+        },
+      );
+
+      test(
+        'should return CacheFailure when call to local source is unsuccessful',
+        () async {
+          when(() => mockOnBoardingLocalDataSrc.checkIfUserIsFirstTimer())
+              .thenThrow(
+            const CacheException(
+              message: 'Insufficient permissions',
+              statusCode: 403,
+            ),
+          );
+
+          final result = await onBoardingRepoImpl.checkIfUserIsFirstTimer();
+          expect(
+            result,
+            equals(
+              Left<CacheFailure, dynamic>(
+                CacheFailure(
+                  message: 'Insufficient permissions',
+                  statusCode: 403,
+                ),
+              ),
+            ),
+          );
+
+          verify(() => mockOnBoardingLocalDataSrc.checkIfUserIsFirstTimer())
+              .called(1);
+          verifyNoMoreInteractions(mockOnBoardingLocalDataSrc);
+        },
+      );
+    },
+  );
 }
