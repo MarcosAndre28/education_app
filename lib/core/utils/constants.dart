@@ -1,0 +1,1 @@
+const kDefaultAvatar = 'https://static.vecteezy.com/system/resources/previews/026/266/484/non_2x/default-avatar-profile-icon-social-media-user-photo-image-vector.jpg';

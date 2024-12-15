@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:education_app/src/auth/domain/entities/user.dart';
 import 'package:education_app/src/auth/domain/usecases/sign_Up.dart';
-import 'package:education_app/src/auth/domain/usecases/sign_in.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
