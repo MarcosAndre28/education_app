@@ -13,6 +13,11 @@ if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader('UTF-8') { reader ->
         localProperties.load(reader)
     }
+
+    def androidKey = localProperties.getProperty('API_KEY_ANDROID')
+    if (androidKey == null) {
+        androidKey = System.getenv('API_KEY_ANDROIDE')
+    }
 }
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
