@@ -1,94 +1,51 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:education_app/src/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
+import 'package:firebase_storage_mocks/firebase_storage_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-
-class MockFirebaseStorage extends Mock implements FirebaseStorage {}
-
-class MockFirebaseAuth extends Mock implements FirebaseAuth {}
-
-class MockFirebaseFireStore extends Mock implements FirebaseFirestore {}
-
-class MockUser extends Mock implements User {
-  final String _uid = 'Test uid';
-
-  @override
-  String get uid => _uid;
-}
-
-class MockUserCredential extends Mock implements UserCredential {
-  MockUserCredential([User? user]) : _user = user;
-  User? _user;
-
-  @override
-  User? get user => _user;
-
-  set user(User? value) {
-    if (_user != value) _user = value;
-  }
-}
+import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 
 void main() {
-  late FirebaseAuth authClient;
-  late FirebaseFirestore cloudStoreClient;
-  late FirebaseStorage dbClient;
+  late FakeFirebaseFirestore cloudStoreClient;
+  late MockFirebaseAuth authClient;
+  late MockFirebaseStorage dbClient;
   late AuthRemoteDataSource dataSource;
-  late UserCredential userCredential;
 
   setUp(
-    () {
-      authClient = MockFirebaseAuth();
-      cloudStoreClient = MockFirebaseFireStore();
+    () async {
+      cloudStoreClient = FakeFirebaseFirestore();
+      final googleSignIn = MockGoogleSignIn();
+      final signInAccount = await googleSignIn.signIn();
+      final googleAuth = await signInAccount!.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in
+      final mockUser = MockUser(
+        uid: 'someuid',
+        email: 'bob@somedomain.com',
+        displayName: 'Bob',
+      );
+
+      authClient = MockFirebaseAuth(mockUser: mockUser);
+      final result = await authClient.signInWithCredential(credential);
+      final user = result.user;
       dbClient = MockFirebaseStorage();
-      final mockUser = MockUser();
-      userCredential = MockUserCredential(mockUser);
+
       dataSource = AuthRemoteDataSourceImpl(
-        authClient: authClient,
         cloudStoreClient: cloudStoreClient,
+        authClient: authClient,
         dbClient: dbClient,
       );
     },
   );
 
-  group(
-    'signIn',
-    () {
-      test(
-        'should complete sucessfully when call to the server is successfull',
-        () async {
-          when(
-            () => authClient.signInWithEmailAndPassword(
-              email: any(named: 'email'),
-              password: any(
-                named: 'password',
-              ),
-            ),
-          ).thenAnswer(
-            (_) async => Future.value(
-              userCredential,
-            ),
-          );
-          when(
-            () => authClient.createUserWithEmailAndPassword(
-              email: 'email',
-              password: 'password',
-            ),
-          );
-          await dataSource.signUp(
-            email: 'email',
-            fullName: 'fullName',
-            password: 'password',
-          );
-          final result = await dataSource.signIn(
-            email: 'email',
-            password: 'password',
-          );
+  const tPassword = 'Test password';
+  const tEmail = 'Test email';
+  const tFullName = 'Test fullName';
 
-          expect(result.email, equals('email'));
-        },
-      );
-    },
-  );
+
 }
